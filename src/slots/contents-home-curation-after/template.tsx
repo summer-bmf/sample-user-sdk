@@ -1,15 +1,19 @@
 /**
- * 샘플 — 상점 홈 섹션 위 위젯 (SDK 슬롯 · USER)
+ * 샘플 — 콘텐츠 홈 안내 위젯 (SDK 슬롯 · USER)
  *
  * 슬롯 위젯은 페이지 전체가 아니라, 플랫폼 화면 "사이"에 끼워 넣는 조각입니다.
  *
  * 폴더 이름은 사람이 알아보기 위한 것일 뿐 배치와 무관합니다.
  * 어느 자리에 붙을지는 아래 createTemplate 의 slot 옵션만 정합니다.
- *   slot: 'user.shop-home.section:before'  →  상점 홈의 섹션 묶음 위
+ *   slot: 'user.contents-home.curation:after'  →  콘텐츠 홈의 큐레이션 섹션 아래
+ *
+ * 한 자리에는 위젯 하나만 놓을 수 있습니다. 같은 자리에 두 개를 두면
+ * 빌드가 산출물이 겹친다고 알려줍니다.
  *
  * 이 자리는 호스트가 넘겨주는 context 가 없습니다(카탈로그의 context 칸이 '—').
  * context 를 주는 자리에서는 useSlotContext 로 받아 씁니다. 예:
- *   const { content } = useSlotContext<'user.contents-detail.body:after'>()
+ *   const ctx = useSlotContext<'user.community-board.feed:before'>()
+ *   const boardTitle = ctx?.board?.title        // 호스트가 없으면 undefined
  *
  * 쓸 수 있는 자리 전체 목록: `npx bstage docs` → SLOT_CATALOG_V2.md
  *
@@ -22,7 +26,7 @@ import { cssVar, fontFamily, textStyle } from '@bstage-sdk/design/user'
 const NOTICE = {
   badge: 'NOTICE',
   title: '이 자리에 원하는 안내를 띄울 수 있어요',
-  body: '상점 홈의 섹션 묶음 바로 위에 붙는 위젯입니다. 공지·이벤트 배너·추천 영역처럼 화면 맨 위에서 먼저 보여주고 싶은 내용을 넣기 좋습니다.',
+  body: '콘텐츠 홈의 큐레이션 섹션 바로 아래에 붙는 위젯입니다. 공지·이벤트 배너·추천 영역처럼 콘텐츠를 둘러보기 전에 먼저 보여주고 싶은 내용을 넣기 좋습니다.',
 }
 
 const css = `
@@ -33,7 +37,7 @@ const css = `
   }
 `
 
-export default function ShopHomeNoticeWidget() {
+export default function ContentsHomeNoticeWidget() {
   return (
     <div
       className="notice"
@@ -91,8 +95,8 @@ export default function ShopHomeNoticeWidget() {
   )
 }
 
-createTemplate(ShopHomeNoticeWidget, {
-  name: 'sample-shop-home-notice',
-  slot: 'user.shop-home.section:before',
+createTemplate(ContentsHomeNoticeWidget, {
+  name: 'sample-contents-home-notice',
+  slot: 'user.contents-home.curation:after',
   styles: css,
 })

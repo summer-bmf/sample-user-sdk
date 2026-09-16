@@ -1,14 +1,13 @@
-# NOTE: keep this file ASCII-only. The portal builder refuses to read config
-# files containing non-ASCII bytes, and the build fails before it starts.
+# NOTE: the portal builder reads this file with a strict, minimal parser.
+# Keep it ASCII-only, leave values unquoted, and do not put comments inside
+# a block. Allowed keys: packages, onlyBuiltDependencies, allowBuilds.
+# Anything else fails the build before it starts.
 #
-# pnpm 9 treats this file's presence as a workspace root and install fails
+# pnpm treats this file's presence as a workspace root and install fails
 # without `packages`. This is a single project, so declare the root only.
 packages:
-  - '.'
+  - .
 
-# pnpm blocks dependency build scripts by default and install ends in error.
-# List the packages to allow here. `pnpm approve-builds` appends entries
-# (set the value to true to take effect).
+# esbuild is the bundler vite uses; its postinstall places platform binaries.
 allowBuilds:
-  # bundler used by vite. its postinstall places platform binaries.
   esbuild: true

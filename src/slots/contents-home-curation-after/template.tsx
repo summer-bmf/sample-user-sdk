@@ -29,6 +29,13 @@ const NOTICE = {
   body: '콘텐츠 홈의 큐레이션 섹션 바로 아래에 붙는 위젯입니다. 공지·이벤트 배너·추천 영역처럼 콘텐츠를 둘러보기 전에 먼저 보여주고 싶은 내용을 넣기 좋습니다.',
 }
 
+/**
+ * 슬롯은 플랫폼의 본문 여백 "바깥"에 붙습니다. 그래서 위젯이 자기 폭을
+ * 정하지 않으면 화면 가장자리까지 꽉 차서, 주변 콘텐츠와 줄이 안 맞습니다.
+ * 플랫폼 본문과 같은 폭(1080px 가운데 정렬)으로 맞춰 둡니다.
+ */
+const CONTENT_MAX_WIDTH = 1080
+
 const css = `
   .notice { transition: border-color .15s ease; }
   .notice:hover { border-color: ${cssVar('border/blue-weak-a')}; }
@@ -50,7 +57,11 @@ export default function ContentsHomeNoticeWidget() {
         border: `1px solid ${cssVar('border/default-a')}`,
         borderRadius: 14,
         padding: '18px 20px',
-        margin: '16px 0',
+        // 좌우 auto 로 가운데 정렬. 화면이 좁을 때를 위해 바깥 여백도 함께 둡니다.
+        margin: '16px auto',
+        maxWidth: CONTENT_MAX_WIDTH,
+        width: 'calc(100% - 40px)',
+        boxSizing: 'border-box',
         color: cssVar('text/primary'),
       }}
     >

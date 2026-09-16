@@ -13,6 +13,17 @@ import { CHEESE_BOOK_PATH, LAYER_CSS } from './styles'
 type FoundState = CollectResult & { collectedTypes: number; totalTypes: number }
 
 /**
+ * 아직 한 개도 모으지 않은 사람인지.
+ *
+ * "첫 방문"을 따로 기록하지 않고 도감이 비었는지로 본다. 기록이 하나 늘 뿐이고,
+ * 저장을 못 쓰는 브라우저에서는 매번 비어 보여 늘 등장하는데 그 편이 낫다.
+ */
+function isFirstTime(): boolean {
+  const book = readBook()
+  return book.lastFoundAt === null && Object.keys(book.counts).length === 0
+}
+
+/**
  * 랜덤 치즈 스티커 한 개와 발견 모달.
  *
  * 슬롯 위젯 6개가 모두 이 컴포넌트 하나를 렌더한다.
@@ -25,7 +36,9 @@ export default function StickerLayer(): ReactElement | null {
   // StrictMode의 두 번째 렌더(개발 모드에서 초기화 함수를 한 번 더 호출)에도 같은 결과가 쓰인다.
   // (useRef에 굴린 값을 담아 렌더에서 읽는 방식은 최신 react-hooks 린트 규칙이
   // "렌더 중 ref 접근"으로 막는다 — ref는 초기화 여부 확인에만 쓰라는 규칙이다.)
-  const [rolled] = useState<RollResult>(() => roll({ force: readDebugMode() }))
+  const [rolled] = useState<RollResult>(() =>
+    roll({ force: readDebugMode(), firstTime: isFirstTime() }),
+  )
 
   const [seated, setSeated] = useState(false)
   const [dismissed, setDismissed] = useState(false)

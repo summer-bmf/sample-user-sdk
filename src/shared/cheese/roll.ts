@@ -32,6 +32,13 @@ export type RollOptions = {
   rng?: () => number
   /** 디버그 플래그로 확률을 강제할 때. */
   force?: DebugMode
+  /**
+   * 아직 하나도 못 모은 사람에게는 확률을 건너뛰고 반드시 띄운다.
+   *
+   * 40%는 여러 번 들러야 한 번 보이는 값이라, 처음 온 사람은 이런 게 있다는 것조차
+   * 모르고 지나가기 쉽다. 한 개라도 모은 뒤부터 원래 확률로 돌아간다.
+   */
+  firstTime?: boolean
 }
 
 function lerp(min: number, max: number, t: number): number {
@@ -46,8 +53,10 @@ export function roll(options: RollOptions = {}): RollResult {
   const rng = options.rng ?? Math.random
   const force = options.force ?? null
 
+  // 디버그 플래그가 가장 세다 — 'never'는 첫 방문이어도 막는다.
   if (force === 'never') return null
-  if (force !== 'always' && rng() >= APPEAR_RATE) return null
+  const skipChance = force === 'always' || options.firstTime === true
+  if (!skipChance && rng() >= APPEAR_RATE) return null
 
   // rng가 정확히 1을 돌려줘도 마지막 종을 가리키도록 막는다.
   const index = Math.min(STICKERS.length - 1, Math.floor(rng() * STICKERS.length))

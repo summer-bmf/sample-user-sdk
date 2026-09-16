@@ -1,11 +1,14 @@
-# pnpm 9는 이 파일이 있으면 workspace 루트로 보고, packages가 없으면 install이 죽는다.
-# 단일 프로젝트이므로 루트만 선언한다.
+# NOTE: keep this file ASCII-only. The portal builder refuses to read config
+# files containing non-ASCII bytes, and the build fails before it starts.
+#
+# pnpm 9 treats this file's presence as a workspace root and install fails
+# without `packages`. This is a single project, so declare the root only.
 packages:
   - '.'
 
-# pnpm은 의존성 build script를 기본 차단하고, 차단 시 install이 에러로 끝난다.
-# 아래에서 허용할 패키지를 명시한다. 새 패키지가 필요해지면 `pnpm approve-builds`가
-# 이 파일에 항목을 추가해 준다(값을 true로 바꿔야 적용된다).
+# pnpm blocks dependency build scripts by default and install ends in error.
+# List the packages to allow here. `pnpm approve-builds` appends entries
+# (set the value to true to take effect).
 allowBuilds:
-  # vite가 쓰는 번들러. postinstall이 플랫폼 바이너리를 놓는다.
+  # bundler used by vite. its postinstall places platform binaries.
   esbuild: true

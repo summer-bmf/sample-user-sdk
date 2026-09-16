@@ -32,9 +32,12 @@ const NOTICE = {
 /**
  * 슬롯은 플랫폼의 본문 여백 "바깥"에 붙습니다. 그래서 위젯이 자기 폭을
  * 정하지 않으면 화면 가장자리까지 꽉 차서, 주변 콘텐츠와 줄이 안 맞습니다.
- * 플랫폼 본문과 같은 폭(1080px 가운데 정렬)으로 맞춰 둡니다.
+ *
+ * 유저 플랫폼의 본문은 바깥 틀이 1080px 가운데 정렬이고, 그 안에 좌우
+ * 32px 여백을 둔 1016px이 실제 글이 놓이는 폭입니다. 위젯도 1016px에
+ * 맞춰야 주변 콘텐츠와 좌우가 떨어집니다.
  */
-const CONTENT_MAX_WIDTH = 1080
+const CONTENT_MAX_WIDTH = 1016
 
 const css = `
   .notice { transition: border-color .15s ease; }

@@ -9,6 +9,7 @@
  * 한 위젯을 자리만 바꿔 여러 곳에 붙일 수 있습니다.
  *
  * 외부 API를 부르지 않습니다. 모은 기록은 브라우저의 localStorage에 남습니다.
+ * iframe 격리 배치에서는 동작하지 않습니다 — src/shared/cheese/README.md 의 "iframe 격리" 참고.
  */
 import { createTemplate } from '@bstage-sdk/react'
 import StickerLayer from '../../shared/cheese/StickerLayer'

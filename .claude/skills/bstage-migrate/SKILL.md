@@ -2,6 +2,7 @@
 name: bstage-migrate
 description: bstage SDK 버전 마이그레이션을 수행한다. SDK가 업데이트되어 오래된 프로젝트를 최신으로 올리거나, "bstage 업데이트", "SDK 마이그레이션", "최신 SDK로 올려줘" 같은 요청을 받을 때 사용한다.
 ---
+<!-- bstage-ai-toolkit 0.13.0 -->
 
 # 역할
 
@@ -18,7 +19,7 @@ description: bstage SDK 버전 마이그레이션을 수행한다. SDK가 업데
 
 - `MIGRATION.md` — 버전별 마이그레이션 항목·절차(단일 소스). 버전 범프+설치 후 `node_modules/@bstage-sdk/cli/dist/MIGRATION.md`(또는 core docs)에서 읽는다.
 - `bstage doctor` — 현재 드리프트 진단(결정론). `npx @bstage-sdk/cli@latest doctor`.
-- 문서 목록: `npx bstage docs`
+- 문서 목록: `npx bstage docs` (SDK 의존이 없는 레포에서는 종료 코드 2로 끝난다 — liquid 레포라면 `bstage-liquid` 스킬을 본다)
 
 # 절차
 
@@ -28,14 +29,28 @@ description: bstage SDK 버전 마이그레이션을 수행한다. SDK가 업데
 npx @bstage-sdk/cli@latest doctor --json
 ```
 
-출력에서 세 가지를 얻는다.
+`bstage ai doctor`로 스킬·AGENTS.md가 최신인지도 함께 본다(stale이면 `bstage ai update`).
+
+출력에서 네 가지를 얻는다.
 
 - `versions` — 뒤처진 패키지와 latest 버전
 - `files` — 누락된 보일러플레이트 파일
 - `recommendedDeps` — 권장 의존성의 선언 상태(`declared: false`면 미선언). **버전 대조로는 안 잡히는 축**이므로 `migrations`가 비어 있어도 따로 확인한다
 - `migrations` — 적용 가능한 마이그레이션 항목. 각 항목은 `label`(헤더 표기, 예: `cli 0.43.0` 또는 `core 0.32.0 · react 0.32.0`) · `requirements`(올려야 할 패키지·최소 버전 쌍) · `items`(항목 제목)를 가진다. 헤더의 패키지를 그 버전 이상으로 올린다
 
+**종료 코드 1이어도 stdout의 JSON은 정상이다** — 로그인·링크된 레포에서는 포털 진단(`portal`)이 함께 돌고, 배치에 error 항목이 있거나 진단이 실패하면 1로 끝난다. `portal`은 배포된 배치의 상태라 마이그레이션과 무관하므로, 1이 나왔다고 진단을 실패로 보지 말고 JSON을 그대로 읽어 위 네 항목으로 진행한다(포털 문제는 따로 사용자에게 알리고 `bstage-deploy` 스킬로 넘긴다).
+
 `isBstageProject`가 false면 bstage 프로젝트가 아니므로 중단한다. 레지스트리 조회에 실패해 `latestChecked`가 false면 버전 비교를 보류한다(보일러플레이트·항목은 계속 진행 가능).
+
+## 1a. liquid 레포일 때
+
+`bstage doctor`가 종류를 liquid로 판정하면 마이그레이션 범위가 다르다.
+
+- 올릴 패키지는 `cli`뿐이다(core·react·design 의존이 없다). `versions`에 그것만 나온다.
+- 보일러플레이트 파일 목록도 liquid 기준이다 — sdk의 `src/`·`vite.config.ts`가 없다고 만들지 않는다.
+- `liquid` 검증 결과(문법·규약·경고)가 함께 나온다. error가 있으면 버전 작업보다 먼저 고친다 — 배포가 막히는 문제다.
+- 스킬 세트는 `bstage-liquid`·`bstage-deploy`·`bstage-onboarding`·이 스킬이다. `bstage ai update`가 맞춰 준다.
+- SDK 문서(`npx bstage docs`)는 SDK 의존이 없어 종료 코드 2로 끝난다 — 작성 규약·데이터·에셋은 `bstage-liquid` 스킬이 들고 있다.
 
 ## 2. 계획 제시 (승인 전 멈춤)
 
@@ -86,7 +101,7 @@ doctor의 `layout.legacyPresent`가 `true`면 `src/templates/`가 남아 있는 
 - 슬롯 배치는 코드에 선언하지 않았다(설계상 관리도구 몫이었다). 그래서 페이지인지 위젯인지도 소스로는 갈리지 않는다.
 - 어드민 전용 `type: 'fullPage' | 'sharedNav'`는 레이아웃 구분이라 이 판단에 쓸 수 없다.
 
-실제 매핑은 관리도구(bstage portal)에만 있다. `layout.legacyTemplates`의 폴더를 하나씩 짚어 묻는다.
+실제 매핑은 관리도구(b.stage kit 콘솔)에만 있다. `layout.legacyTemplates`의 폴더를 하나씩 짚어 묻는다.
 
 - 먼저 **소스를 읽고 추정안을 만들어 제시한다.** 전체 화면을 그리는지 작은 조각인지, 컴포넌트 이름이 무엇인지는 네가 읽어서 알 수 있다. 사용자가 백지에서 답하게 두지 않는다.
 - 위젯이라고 답하면 **자리 목록을 선택지로 제시한다.** 카탈로그는 SDK가 들고 있으므로 사용자에게 찾아오라고 하지 않는다 — `node_modules/@bstage-sdk/core`의 `SLOT_CATALOG_V2`(또는 `SLOT_CATALOG_V2.md`)를 읽어 `description`과 함께 보여준다.
@@ -102,7 +117,7 @@ doctor의 `layout.legacyPresent`가 `true`면 `src/templates/`가 남아 있는 
 `AGENTS.md`는 **SDK 관리 영역**(마커 `BSTAGE:MANAGED:START`~`END`로 감싼 SDK 저작 보일러플레이트)과 **자유 영역**(마커 바깥, 프로젝트 고유 규칙)으로 나뉜다. doctor의 `agentsMd.status`로 분기한다.
 
 - `ok` — 할 일 없음.
-- `stale` (마커는 있고 버전만 낮음) — **자동**. `bstage skills install`을 실행하면 관리 영역만 최신으로 치환되고 자유 영역은 보존된다. 끝.
+- `stale` (마커는 있고 버전만 낮음) — **자동**. `bstage ai update`를 실행하면 관리 영역만 최신으로 치환되고 자유 영역은 보존된다. 끝.
 - `legacy` (마커 없음 — 옛 프로젝트) — **판단**. SDK 내용과 사용자 내용이 한 덩어리라 1회 reconcile이 필요하다. **경계는 네(에이전트)가 먼저 분류해 제안하고, 사용자에겐 확인만 받는다** — 사용자에게 "어디까지가 프로젝트 추가분이냐"를 백지에서 묻지 않는다(사용자는 AGENTS.md 구조를 모를 수 있고, 분류는 네 책임이다).
   1. doctor `--json`의 `agentsMd.managedBlock`이 적용할 **최신 SDK 관리 영역(마커 포함)**이다. 이걸 레퍼런스로 삼아, 옛 AGENTS.md의 각 구간이 **SDK 보일러플레이트**(프로젝트 개요·SDK 문서 목록·프로젝트 구조·템플릿 작성 규칙·금지 사항·옛 `client.get('/api/...')` 예시나 엔드포인트 목록 등 — managedBlock이 대체하는 것)인지, **프로젝트 고유 내용**(이 레포만의 규칙·도메인 메모 등)인지 분류한다.
   2. 분류 결과로 "맨 위 = managedBlock, 그 아래 자유 영역 = 프로젝트 고유 내용만" 구조의 재작성안을 만든다. SDK 보일러플레이트는 managedBlock이 대신하므로 **자유 영역에 중복 보존하지 않는다** — 특히 옛 `/api/` 경로 목록이 남으면 재발 원인이 된다.
